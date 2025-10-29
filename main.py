@@ -23,7 +23,7 @@ def correct_phone_format(s):
 
 def correct_date_format(s):
     try:
-        data = datetime.datetime.strptime(s, '%d.%m.%Y %H:%M')
+        datetime.datetime.strptime(s, '%d.%m.%Y %H:%M')
     except Exception:
         return False
     return True
@@ -687,7 +687,8 @@ class MyWindow(QMainWindow):
 
     def show_seats(self):
         address, ok = QInputDialog(self).getText(
-            self, 'Просмотр сидений', 'Введите адрес кинотеатра, где расположен интересующий вас зал')
+            self, 'Просмотр сидений',
+            'Введите адрес кинотеатра, где расположен интересующий вас зал')
 
         if not ok:
             return
@@ -704,13 +705,16 @@ class MyWindow(QMainWindow):
             return
 
         room_n, ok = QInputDialog(self).getInt(
-            self, 'Просмотр сидений', 'Введите номер интересующего вас зала', 1, 1)
+            self, 'Просмотр сидений',
+            'Введите номер интересующего вас зала', 1, 1)
 
         if not ok:
             con.close()
             return
 
-        query = 'SELECT RoomNumber FROM Rooms WHERE CinemaId in (SELECT CinemaId FROM Cinemas WHERE CinemaAddress = ?)'
+        query = '''SELECT RoomNumber FROM Rooms
+                WHERE CinemaId in (
+                SELECT CinemaId FROM Cinemas WHERE CinemaAddress = ?)'''
 
         if room_n not in [i[0]
                           for i in cur.execute(query, (address,)).fetchall()]:
@@ -763,10 +767,12 @@ class MyWindow(QMainWindow):
             QMessageBox.critical(
                 self, 'Ошибка', 'Неправильный формат номера телефона')
             phone, ok_phone = QInputDialog(self).getText(
-                self, 'Новый кинотеатр', 'Введите контактный номер кинотеатра')
+                self, 'Новый кинотеатр',
+                'Введите контактный номер кинотеатра')
 
         more, ok = QInputDialog(self).getText(
-            self, 'Новый кинотеатр', 'Введите дополнительную информацию (опиционально)')
+            self, 'Новый кинотеатр',
+            'Введите дополнительную информацию (опиционально)')
         if ok:
             cinema = Cinema(name, address, phone, more)
             self.add_cinema(cinema)
@@ -800,7 +806,8 @@ class MyWindow(QMainWindow):
 
     def delete_cinema(self):
         address, ok = QInputDialog(self).getText(
-            self, 'Удаление кинотеатра', 'Введите адрес удаляемого кинотеатра')
+            self, 'Удаление кинотеатра',
+            'Введите адрес удаляемого кинотеатра')
 
         if not ok:
             return
@@ -837,7 +844,8 @@ class MyWindow(QMainWindow):
 
     def edit_cinema(self):
         address, ok = QInputDialog(self).getText(
-            self, 'Редактирование информации', 'Введите адрес изменяемого кинотеатра')
+            self, 'Редактирование информации',
+            'Введите адрес изменяемого кинотеатра')
 
         if not ok:
             return
@@ -854,7 +862,8 @@ class MyWindow(QMainWindow):
             return
 
         edit, ok = QInputDialog(self).getItem(
-            self, 'Редактирование информации', 'Выберите, что хотите изменить', [
+            self, 'Редактирование информации',
+            'Выберите, что хотите изменить', [
                 'Имя', 'Адрес', 'Телефон', 'Дополнительная информация'])
 
         if not ok:
@@ -869,7 +878,8 @@ class MyWindow(QMainWindow):
                 con.close()
                 return
 
-            query = 'UPDATE Cinemas SET CinemaName = ? WHERE CinemaAddress = ?'
+            query = '''UPDATE Cinemas SET CinemaName = ?
+                    WHERE CinemaAddress = ?'''
             cur.execute(query, (name, address))
 
             con.commit()
@@ -887,10 +897,12 @@ class MyWindow(QMainWindow):
 
             if new_address in [i[0] for i in cur.execute(query).fetchall()]:
                 QMessageBox(self).critical(
-                    self, 'Ошибка', 'По такому адресу уже существует кинотеатр')
+                    self, 'Ошибка',
+                    'По такому адресу уже существует кинотеатр')
                 return
 
-            query = 'UPDATE Cinemas SET CinemaAddress = ? WHERE CinemaAddress = ?'
+            query = '''UPDATE Cinemas SET CinemaAddress = ?
+                    WHERE CinemaAddress = ?'''
             cur.execute(query, (new_address, address))
 
             con.commit()
@@ -909,7 +921,8 @@ class MyWindow(QMainWindow):
                     self, 'Ошибка', 'Неправильный формат телефона')
                 return
 
-            query = 'UPDATE Cinemas SET CinemaPhone = ? WHERE CinemaAddress = ?'
+            query = '''UPDATE Cinemas SET CinemaPhone = ?
+                    WHERE CinemaAddress = ?'''
             cur.execute(query, (phone, address))
 
             con.commit()
@@ -917,13 +930,15 @@ class MyWindow(QMainWindow):
 
         elif edit == 'Дополнительная информация':
             more, ok = QInputDialog(self).getText(
-                self, 'Редактирование информации', 'Введите дополнительную информацию')
+                self, 'Редактирование информации',
+                'Введите дополнительную информацию')
 
             if not ok:
                 con.close()
                 return
 
-            query = 'UPDATE Cinemas SET CinemaInfo = ? WHERE CinemaAddress = ?'
+            query = '''UPDATE Cinemas SET CinemaInfo = ?
+                    WHERE CinemaAddress = ?'''
             cur.execute(query, (more, address))
 
             con.commit()
@@ -938,7 +953,8 @@ class MyWindow(QMainWindow):
 
     def create_room(self):
         address, ok = QInputDialog(self).getText(
-            self, 'Новый кинозал', 'Введите адрес кинотеатра, куда добавляете кинозал')
+            self, 'Новый кинозал',
+            'Введите адрес кинотеатра, куда добавляете кинозал')
 
         if not ok:
             return
@@ -961,13 +977,15 @@ class MyWindow(QMainWindow):
         con.close()
 
         n_rows, ok = QInputDialog(self).getInt(
-            self, 'Новый кинозал', 'Введите количество рядов сидений', 10, 1, 30)
+            self, 'Новый кинозал',
+            'Введите количество рядов сидений', 10, 1, 30)
 
         if not ok:
             return
 
         n_cols, ok = QInputDialog(self).getInt(
-            self, 'Новый кинозал', 'Введите количество сидений в одном ряду', 10, 1, 50)
+            self, 'Новый кинозал',
+            'Введите количество сидений в одном ряду', 10, 1, 50)
 
         if not ok:
             return
@@ -1012,7 +1030,8 @@ class MyWindow(QMainWindow):
 
     def delete_room(self):
         address, ok = QInputDialog(self).getText(
-            self, 'Удаление кинозала', 'Введите адрес кинотеатре, где хотите удалить кинозал')
+            self, 'Удаление кинозала',
+            'Введите адрес кинотеатре, где хотите удалить кинозал')
 
         if not ok:
             return
@@ -1041,7 +1060,8 @@ class MyWindow(QMainWindow):
         query = 'SELECT RoomNumber FROM Rooms WHERE CinemaId = ?'
 
         if room_n not in [i[0]
-                          for i in cur.execute(query, (cinema_id,)).fetchall()]:
+                          for i in cur.execute(query,
+                          (cinema_id,)).fetchall()]:
             QMessageBox(self).critical(
                 self, 'Ошибка', 'В кинотеатре нет кинозала с таким номером')
             con.close()
@@ -1051,7 +1071,8 @@ class MyWindow(QMainWindow):
 
         cur.execute(query, (room_n, cinema_id))
 
-        query = 'DELETE FROM Sessions WHERE CinemaAddress = ? AND RoomNumber = ?'
+        query = '''DELETE FROM Sessions
+                WHERE CinemaAddress = ? AND RoomNumber = ?'''
 
         cur.execute(query, (address, room_n))
 
@@ -1063,7 +1084,8 @@ class MyWindow(QMainWindow):
 
     def edit_room(self):
         address, ok = QInputDialog(self).getText(
-            self, 'Редактирование кинозала', 'Введите адрес кинотеатре, где хотите отредактировать кинозал')
+            self, 'Редактирование кинозала',
+            'Введите адрес кинотеатре, где хотите отредактировать кинозал')
 
         if not ok:
             return
@@ -1080,7 +1102,8 @@ class MyWindow(QMainWindow):
             return
 
         room_n, ok = QInputDialog(self).getInt(
-            self, 'Редактирование кинозала', 'Введите номер редактируемого кинозала', 1, 1)
+            self, 'Редактирование кинозала',
+            'Введите номер редактируемого кинозала', 1, 1)
 
         if not ok:
             con.close()
@@ -1092,34 +1115,41 @@ class MyWindow(QMainWindow):
         query = 'SELECT RoomNumber FROM Rooms WHERE CinemaId = ?'
 
         if room_n not in [i[0]
-                          for i in cur.execute(query, (cinema_id,)).fetchall()]:
+                          for i in cur.execute(query,
+                          (cinema_id,)).fetchall()]:
             QMessageBox(self).critical(
                 self, 'Ошибка', 'В кинотеатре нет кинозала с таким номером')
             con.close()
             return
 
-        edit, ok = QInputDialog(self).getItem(self, 'Редактирование кинозала',
-                                              'Выберите, что хотите изменить', ('Количество рядов', 'Количество сидений в ряду'))
+        edit, ok = QInputDialog.getItem(self, 'Редактирование кинозала',
+                                              'Выберите, что хотите изменить',
+                                              ('Количество рядов',
+                                               'Количество сидений в ряду'))
         if edit == 'Количество рядов':
-            n_rows, ok = QInputDialog(self).getInt(
-                self, 'Редактирование кинозала', 'Введите новое количество рядов', 10, 1, 30)
+            n_rows, ok = QInputDialog.getInt(
+                    self, 'Редактирование кинозала',
+                    'Введите новое количество рядов', 10, 1, 30)
 
             if not ok:
                 con.close()
                 return
 
-            query = 'UPDATE Rooms SET RoomRows = ? WHERE CinemaId = ? and RoomNumber = ?'
+            query = '''UPDATE Rooms SET RoomRows = ?
+                    WHERE CinemaId = ? and RoomNumber = ?'''
             cur.execute(query, (n_rows, cinema_id, room_n))
 
         elif edit == 'Количество сидений в ряду':
             n_cols, ok = QInputDialog(self).getInt(
-                self, 'Редактирование кинозала', 'Введите новое количество сидений в ряду', 10, 1, 50)
+                self, 'Редактирование кинозала',
+                'Введите новое количество сидений в ряду', 10, 1, 50)
 
             if not ok:
                 con.close()
                 return
 
-            query = 'UPDATE Rooms SET RoomColumns = ? WHERE CinemaId = ? and RoomNumber = ?'
+            query = '''UPDATE Rooms SET RoomColumns = ?
+                    WHERE CinemaId = ? and RoomNumber = ?'''
             cur.execute(query, (n_cols, cinema_id, room_n))
 
         else:
@@ -1151,7 +1181,8 @@ class MyWindow(QMainWindow):
         con.close()
 
         duration, ok = QInputDialog(self).getInt(
-            self, 'Новый фильм', 'Введите длительность в минутах', 60, 10, 300)
+            self, 'Новый фильм',
+            'Введите длительность в минутах', 60, 10, 300)
 
         if not ok:
             return
@@ -1192,7 +1223,8 @@ class MyWindow(QMainWindow):
 
     def delete_film(self):
         name, ok = QInputDialog(self).getText(
-            self, 'Удаление фильма', 'Введите название фильма, который хотите удалить')
+            self, 'Удаление фильма',
+            'Введите название фильма, который хотите удалить')
 
         if not ok:
             return
@@ -1224,7 +1256,8 @@ class MyWindow(QMainWindow):
 
     def edit_film(self):
         name, ok = QInputDialog(self).getText(
-            self, 'Удаление фильма', 'Введите название фильма, который хотите удалить')
+            self, 'Удаление фильма',
+            'Введите название фильма, который хотите удалить')
 
         if not ok:
             return
@@ -1240,8 +1273,10 @@ class MyWindow(QMainWindow):
             con.close()
             return
 
-        edit, ok = QInputDialog(self).getItem(self, 'Редактирование фильма', 'Выберите, что хотите изменить',
-                                              ('Название', 'Длительность', 'Цена билета', 'Описание'))
+        edit, ok = QInputDialog(self).getItem(self, 'Редактирование фильма',
+                                              'Выберите, что хотите изменить',
+                                              ('Название', 'Длительность',
+                                               'Цена билета', 'Описание'))
 
         if not ok:
             con.close()
@@ -1269,7 +1304,8 @@ class MyWindow(QMainWindow):
 
         elif edit == 'Длительность':
             duration, ok = QInputDialog(self).getInt(
-                self, 'Редактирование фильма', 'Введите новую длительность', 60, 10, 300)
+                self, 'Редактирование фильма',
+                'Введите новую длительность', 60, 10, 300)
 
             if not ok:
                 con.close()
@@ -1332,17 +1368,22 @@ class MyWindow(QMainWindow):
             return
 
         room_n, ok = QInputDialog(self).getInt(
-            self, 'Новый сеанс', 'Введите номер кинозала, в котором будет проходить сеанс', 1)
+            self, 'Новый сеанс',
+            'Введите номер кинозала, в котором будет проходить сеанс', 1)
 
         if not ok:
             con.close()
             return
 
-        query = 'SELECT RoomNumber FROM Rooms WHERE CinemaId IN (SELECT CinemaId FROM Cinemas WHERE CinemaAddress = ?)'
+        query = '''SELECT RoomNumber FROM Rooms
+                WHERE CinemaId IN
+                SELECT CinemaId FROM Cinemas
+                WHERE CinemaAddress = ?)'''
 
         if room_n not in [i[0] for i in cur.execute(query, (address,))]:
             QMessageBox(self).critical(
-                self, 'Ошибка', 'В этом кинотеатре нет кинозала с таким номером')
+                self, 'Ошибка',
+                'В этом кинотеатре нет кинозала с таким номером')
             con.close()
             return
 
@@ -1362,7 +1403,8 @@ class MyWindow(QMainWindow):
             return
 
         date_start, ok = QInputDialog(self).getText(
-            self, 'Новый сеанс', 'Введите дату начала. Формат: dd.mm.yyyy hh:MM')
+            self, 'Новый сеанс',
+            'Введите дату начала. Формат: dd.mm.yyyy hh:MM')
 
         if not ok:
             con.close()
@@ -1382,7 +1424,8 @@ class MyWindow(QMainWindow):
         form = '%d.%m.%Y %H:%M'
 
         timetable = date_start + ' -- ' + datetime.datetime.strftime(
-            datetime.datetime.strptime(date_start, form) + film_duration, form)
+            datetime.datetime.strptime(date_start,
+                                       form) + film_duration, form)
 
         query = 'SELECT * FROM Sessions'
 
@@ -1402,7 +1445,9 @@ class MyWindow(QMainWindow):
         con = sqlite3.connect('Cinemas_db.sqlite')
         cur = con.cursor()
 
-        query = 'INSERT INTO Sessions (CinemaAddress, RoomNumber, FilmName, TimeTable) VALUES (?, ?, ?, ?)'
+        query = '''INSERT INTO Sessions (
+                CinemaAddress, RoomNumber, FilmName, TimeTable)
+                VALUES (?, ?, ?, ?)'''
 
         cur.execute(
             query,
@@ -1418,7 +1463,8 @@ class MyWindow(QMainWindow):
 
     def delete_session(self):
         address, ok = QInputDialog(self).getText(
-            self, 'Удаление сеанса', 'Введите адрес кинотеатра, где проходит сеанс')
+            self, 'Удаление сеанса',
+            'Введите адрес кинотеатра, где проходит сеанс')
 
         if not ok:
             return
@@ -1435,7 +1481,8 @@ class MyWindow(QMainWindow):
             return
 
         room_n, ok = QInputDialog(self).getInt(
-            self, 'Удаление сеанса', 'Введите номер кинозала, где проходит сеанс', 1, 1)
+            self, 'Удаление сеанса',
+            'Введите номер кинозала, где проходит сеанс', 1, 1)
 
         if not ok:
             con.close()
@@ -1446,18 +1493,22 @@ class MyWindow(QMainWindow):
         if room_n not in [i[0]
                           for i in cur.execute(query, (address,)).fetchall()]:
             QMessageBox(self).critical(
-                self, 'Ошибка', 'В этом кинотеатре нет кинозала с таким номером')
+                self, 'Ошибка',
+                'В этом кинотеатре нет кинозала с таким номером')
             con.close()
             return
 
         timetable, ok = QInputDialog(self).getText(
-            self, 'Удаление сеанса', 'Введите расписание сеанса в таком формате, в каком он показан в таблице')
+            self, 'Удаление сеанса',
+            'Введите расписание сеанса в таком формате,\
+ в каком он показан в таблице')
 
         if not ok:
             con.close()
             return
 
-        query = 'SELECT TimeTable FROM Sessions WHERE CinemaAddress = ? AND RoomNumber = ?'
+        query = '''SELECT TimeTable FROM Sessions
+                WHERE CinemaAddress = ? AND RoomNumber = ?'''
 
         if timetable not in [
             i[0] for i in cur.execute(
@@ -1467,7 +1518,9 @@ class MyWindow(QMainWindow):
             con.close()
             return
 
-        query = 'DELETE FROM Sessions WHERE CinemaAddress = ? AND RoomNumber = ? AND TimeTable = ?'
+        query = '''DELETE FROM Sessions
+                WHERE CinemaAddress = ?
+                AND RoomNumber = ? AND TimeTable = ?'''
 
         cur.execute(query, (address, room_n, timetable))
 
@@ -1478,7 +1531,8 @@ class MyWindow(QMainWindow):
 
     def edit_session(self):
         address, ok = QInputDialog(self).getText(
-            self, 'Редактирование сеанса', 'Введите адрес кинотеатра, где проходит сеанс')
+            self, 'Редактирование сеанса',
+            'Введите адрес кинотеатра, где проходит сеанс')
 
         if not ok:
             return
@@ -1495,7 +1549,8 @@ class MyWindow(QMainWindow):
             return
 
         room_n, ok = QInputDialog(self).getInt(
-            self, 'Редактирование сеанса', 'Введите номер кинозала, где проходит сеанс', 1, 1)
+            self, 'Редактирование сеанса',
+            'Введите номер кинозала, где проходит сеанс', 1, 1)
 
         if not ok:
             con.close()
@@ -1506,18 +1561,22 @@ class MyWindow(QMainWindow):
         if room_n not in [i[0]
                           for i in cur.execute(query, (address,)).fetchall()]:
             QMessageBox(self).critical(
-                self, 'Ошибка', 'В этом кинотеатре нет кинозала с таким номером')
+                self, 'Ошибка',
+                'В этом кинотеатре нет кинозала с таким номером')
             con.close()
             return
 
         timetable, ok = QInputDialog(self).getText(
-            self, 'Редактирование сеанса', 'Введите расписание сеанса в таком формате, в каком он показан в таблице')
+            self, 'Редактирование сеанса',
+            'Введите расписание сеанса в таком формате,\
+ в каком он показан в таблице')
 
         if not ok:
             con.close()
             return
 
-        query = 'SELECT TimeTable FROM Sessions WHERE CinemaAddress = ? AND RoomNumber = ?'
+        query = '''SELECT TimeTable FROM Sessions
+                WHERE CinemaAddress = ? AND RoomNumber = ?'''
 
         if timetable not in [
             i[0] for i in cur.execute(
@@ -1527,13 +1586,18 @@ class MyWindow(QMainWindow):
             con.close()
             return
 
-        query = 'SELECT FilmName FROM Sessions WHERE CinemaAddress = ? AND RoomNumber = ? AND TimeTable = ?'
+        query = '''SELECT FilmName FROM Sessions
+                WHERE CinemaAddress = ?
+                AND RoomNumber = ? AND TimeTable = ?'''
 
         film_name = cur.execute(
             query, (address, room_n, timetable)).fetchone()[0]
 
-        edit, ok = QInputDialog(self).getItem(self, 'Редактирование сеанса', 'Выберите, что хотите изменить',
-                                              ('Адрес кинотеатра', 'Номер кинозала', 'Фильм', 'Расписание'))
+        edit, ok = QInputDialog(self).getItem(self, 'Редактирование сеанса',
+                                              'Выберите, что хотите изменить',
+                                              ('Адрес кинотеатра',
+                                               'Номер кинозала', 'Фильм',
+                                               'Расписание'))
 
         if not ok:
             con.close()
@@ -1557,27 +1621,34 @@ class MyWindow(QMainWindow):
                 return
 
             query = '''SELECT RoomNumber FROM Rooms
-                    WHERE CinemaId in (SELECT CinemaId FROM Cinemas WHERE CinemaAddress = ?)'''
+                    WHERE CinemaId in (
+                    SELECT CinemaId FROM Cinemas
+                    WHERE CinemaAddress = ?)'''
 
             if room_n not in [
                 i[0] for i in cur.execute(
                     query, (new_address,)).fetchall()]:
                 QMessageBox(self).critical(
-                    self, 'Ошибка', 'В этом кинотеатре нет подходящего кинозала')
+                    self, 'Ошибка',
+                    'В этом кинотеатре нет подходящего кинозала')
                 con.close()
                 return
 
-            query = 'SELECT TimeTable FROM Sessions WHERE CinemaAddress = ? AND RoomNumber = ?'
+            query = '''SELECT TimeTable FROM Sessions
+                    WHERE CinemaAddress = ? AND RoomNumber = ?'''
 
             for i in cur.execute(query, (new_address, room_n)):
                 if timetables_intersect(i[0], timetable):
                     QMessageBox(self).critical(
-                        self, 'Ошибка', 'При таком изменении возникает накладка времен сеансов')
+                        self, 'Ошибка',
+                        'При таком изменении возникает\
+ накладка времен сеансов')
                     con.close()
                     return
 
             query = '''UPDATE Sessions SET CinemaAddress = ?
-                    WHERE CinemaAddress = ? AND RoomNumber = ? AND TimeTable = ?'''
+                    WHERE CinemaAddress = ? AND RoomNumber = ?
+                    AND TimeTable = ?'''
 
             cur.execute(
                 query,
@@ -1593,34 +1664,43 @@ class MyWindow(QMainWindow):
 
         elif edit == 'Номер кинозала':
             new_room_n, ok = QInputDialog(self).getInt(
-                self, 'Редактирование сеанса', 'Введите новый номер зала, где будет сеанс', 1, 1)
+                self, 'Редактирование сеанса',
+                'Введите новый номер зала, где будет сеанс', 1, 1)
 
             if not ok:
                 con.close()
                 return
 
             query = '''SELECT RoomNumber FROM Rooms
-                    WHERE CinemaId in (SELECT CinemaId FROM Cinemas WHERE CinemaAddress = ?)'''
+                    WHERE CinemaId in (
+                    SELECT CinemaId FROM Cinemas
+                    WHERE CinemaAddress = ?)'''
 
             if new_room_n not in [
                 i[0] for i in cur.execute(
                     query, (address,)).fetchall()]:
                 QMessageBox(self).critical(
-                    self, 'Ошибка', 'В этом кинотеатре нет кинозала с таким номером')
+                    self, 'Ошибка',
+                    'В этом кинотеатре нет кинозала с таким номером')
                 con.close()
                 return
 
-            query = 'SELECT TimeTable FROM Sessions WHERE CinemaAddress = ? AND RoomNumber = ?'
+            query = '''SELECT TimeTable FROM Sessions
+                    WHERE CinemaAddress = ?
+                    AND RoomNumber = ?'''
 
             for i in cur.execute(query, (address, new_room_n)):
                 if timetables_intersect(i[0], timetable):
                     QMessageBox(self).critical(
-                        self, 'Ошибка', 'При таком изменении возникает накладка времен сеансов')
+                        self, 'Ошибка',
+                        'При таком изменении возникает\
+ накладка времен сеансов')
                     con.close()
                     return
 
             query = '''UPDATE Sessions SET RoomNumber = ?
-                    WHERE CinemaAddress = ? AND RoomNumber = ? AND TimeTable = ?'''
+                    WHERE CinemaAddress = ?
+                    AND RoomNumber = ? AND TimeTable = ?'''
 
             cur.execute(
                 query,
@@ -1636,7 +1716,8 @@ class MyWindow(QMainWindow):
 
         elif edit == 'Фильм':
             new_film_name, ok = QInputDialog(self).getText(
-                self, 'Редактирование сеанса', 'Введите новое название фильма')
+                self, 'Редактирование сеанса',
+                'Введите новое название фильма')
 
             if not ok:
                 con.close()
@@ -1660,7 +1741,8 @@ class MyWindow(QMainWindow):
 
             date_start = timetable.split(' -- ')[0]
             new_timetable = date_start + ' -- ' + datetime.datetime.strftime(
-                datetime.datetime.strptime(date_start, form) + new_film_duration, form)
+                datetime.datetime.strptime(date_start,
+                                           form) + new_film_duration, form)
 
             query = """SELECT TimeTable FROM Sessions
                     WHERE CinemaAddress = ? AND RoomNumber = ?
@@ -1670,11 +1752,16 @@ class MyWindow(QMainWindow):
                     query, (address, room_n, timetable)).fetchall():
                 if timetables_intersect(i[0], new_timetable):
                     QMessageBox(self).critical(
-                        self, 'Ошибка', 'При таком изменении возникает накладка времен сеансов')
+                        self, 'Ошибка',
+                        'При таком изменении возникает\
+ накладка времен сеансов')
                     con.close()
                     return
 
-            query = 'UPDATE Sessions SET TimeTable = ? WHERE CinemaAddress = ? AND RoomNumber = ? AND TimeTable = ?'
+            query = '''UPDATE Sessions SET TimeTable = ?
+                    WHERE CinemaAddress = ?
+                    AND RoomNumber = ?
+                    AND TimeTable = ?'''
 
             cur.execute(query, (new_timetable, address, room_n, timetable))
 
@@ -1685,7 +1772,8 @@ class MyWindow(QMainWindow):
 
         elif edit == 'Расписание':
             new_start, ok = QInputDialog(self).getText(
-                self, 'Редактирование сеанса', 'Введите время начала в формате dd.mm.yyyy hh:mm')
+                self, 'Редактирование сеанса',
+                'Введите время начала в формате dd.mm.yyyy hh:mm')
 
             if not ok:
                 con.close()
@@ -1704,8 +1792,9 @@ class MyWindow(QMainWindow):
 
             form = '%d.%m.%Y %H:%M'
 
-            new_timetable = new_timetable = new_start + ' -- ' + datetime.datetime.strftime(
-                datetime.datetime.strptime(new_start, form) + film_duration, form)
+            new_timetable = new_start + ' -- ' + datetime.datetime.strftime(
+                datetime.datetime.strptime(new_start,
+                                           form) + film_duration, form)
 
             query = """SELECT TimeTable FROM Sessions
                     WHERE CinemaAddress = ? AND RoomNumber = ?
@@ -1715,11 +1804,15 @@ class MyWindow(QMainWindow):
                     query, (address, room_n, timetable)).fetchall():
                 if timetables_intersect(i[0], new_timetable):
                     QMessageBox(self).critical(
-                        self, 'Ошибка', 'При таком изменении возникает накладка времен сеансов')
+                        self, 'Ошибка',
+                        'При таком изменении возникает\
+ накладка времен сеансов')
                     con.close()
                     return
 
-            query = 'UPDATE Sessions SET TimeTable = ? WHERE CinemaAddress = ? AND RoomNumber = ? AND TimeTable = ?'
+            query = '''UPDATE Sessions SET TimeTable = ?
+                    WHERE CinemaAddress = ?
+                    AND RoomNumber = ? AND TimeTable = ?'''
 
             cur.execute(query, (new_timetable, address, room_n, timetable))
 
@@ -1736,7 +1829,9 @@ class MyWindow(QMainWindow):
 
     def create_booking(self):
         session_id, ok = QInputDialog(self).getInt(
-            self, 'Новая бронь', 'Введите идентификатор сеанса, место на котором хотите забронировать', 1, 1)
+            self, 'Новая бронь',
+            'Введите идентификатор сеанса,\
+ место на котором хотите забронировать', 1, 1)
 
         if not ok:
             return
@@ -1748,7 +1843,8 @@ class MyWindow(QMainWindow):
 
         if session_id not in [i[0] for i in cur.execute(query).fetchall()]:
             QMessageBox(self).critical(
-                self, 'Ошибка', 'Сеанса с таким идентификатором не существует')
+                self, 'Ошибка',
+                'Сеанса с таким идентификатором не существует')
             con.close()
             return
 
@@ -1762,7 +1858,9 @@ class MyWindow(QMainWindow):
         max_row = cur.execute(query, (session_id,)).fetchone()[0]
 
         row_n, ok = QInputDialog(self).getInt(
-            self, 'Новая бронь', 'Введите номер ряда, сиденье на котором бронируете', 1, 1, max_row)
+            self, 'Новая бронь',
+            'Введите номер ряда,\
+ сиденье на котором бронируете', 1, 1, max_row)
 
         if not ok:
             con.close()
@@ -1778,7 +1876,8 @@ class MyWindow(QMainWindow):
         max_col = cur.execute(query, (session_id,)).fetchone()[0]
 
         col_n, ok = QInputDialog(self).getInt(
-            self, 'Новая бронь', 'Введите номер сиденья, которое бронируете', 1, 1, max_col)
+            self, 'Новая бронь',
+            'Введите номер сиденья, которое бронируете', 1, 1, max_col)
 
         if not ok:
             con.close()
@@ -1795,7 +1894,8 @@ class MyWindow(QMainWindow):
             return
 
         booking_contact, ok = QInputDialog(self).getText(
-            self, 'Новая бронь', 'Введите контактные данные (в любом формате)')
+            self, 'Новая бронь',
+            'Введите контактные данные (в любом формате)')
 
         if not ok:
             con.close()
@@ -1864,7 +1964,9 @@ class MyWindow(QMainWindow):
 
     def delete_booking(self):
         session_id, ok = QInputDialog(self).getInt(
-            self, 'Удаление брони', 'Введите идентификатор сеанса, на котором хотите отменить бронь', 1, 1)
+            self, 'Удаление брони',
+            'Введите идентификатор сеанса,\
+ на котором хотите отменить бронь', 1, 1)
 
         if not ok:
             return
@@ -1876,7 +1978,8 @@ class MyWindow(QMainWindow):
 
         if session_id not in [i[0] for i in cur.execute(query).fetchall()]:
             QMessageBox(self).critical(
-                self, 'Ошибка', 'Сеанса с таким идентификатором не существует')
+                self, 'Ошибка',
+                'Сеанса с таким идентификатором не существует')
             con.close()
             return
 
@@ -1890,7 +1993,9 @@ class MyWindow(QMainWindow):
         max_row = cur.execute(query, (session_id,)).fetchone()[0]
 
         row_n, ok = QInputDialog(self).getInt(
-            self, 'Удаление брони', 'Введите номер ряда, на котором хотите отменить бронь', 1, 1, max_row)
+            self, 'Удаление брони',
+            'Введите номер ряда,\
+ на котором хотите отменить бронь', 1, 1, max_row)
 
         if not ok:
             con.close()
@@ -1906,7 +2011,9 @@ class MyWindow(QMainWindow):
         max_col = cur.execute(query, (session_id,)).fetchone()[0]
 
         col_n, ok = QInputDialog(self).getInt(
-            self, 'Удаление брони', 'Введите номер сиденья, бронь которого хотите отменить', 1, 1, max_col)
+            self, 'Удаление брони',
+            'Введите номер сиденья,\
+ бронь которого хотите отменить', 1, 1, max_col)
 
         if not ok:
             con.close()
@@ -1956,7 +2063,8 @@ class MyWindow(QMainWindow):
                 form = '%d.%m.%Y %H:%M'
 
                 sessions = cur.execute(
-                    f'SELECT * FROM Sessions WHERE TimeTable LIKE "{date}%"').fetchall()
+                    f'''SELECT * FROM Sessions
+                    WHERE TimeTable LIKE "{date}%"''').fetchall()
                 sessions.sort(
                     key=lambda x: abs(
                         datetime.datetime.now() -
@@ -1976,7 +2084,8 @@ class MyWindow(QMainWindow):
                     labels[i].setText('- - - - - - - -')
                     try:
                         cur = sessions[i]
-                        text = 'Фильм {} показывается в кинотеатре по адресу {} {} в кинозале {}'.format(
+                        text = '''Фильм {} показывается в кинотеатре по
+                        адресу {} {} в кинозале {}'''.format(
                             cur[-1], cur[1], cur[3], cur[2])
                         labels[i].setText(text)
                     except Exception:
@@ -1988,7 +2097,7 @@ class MyWindow(QMainWindow):
             form = '%d.%m.%Y %H:%M'
 
             sessions = cur.execute(
-                f'SELECT * FROM Sessions WHERE CinemaAddress = ?',
+                'SELECT * FROM Sessions WHERE CinemaAddress = ?',
                 (cinema_address,
                  )).fetchall()
             sessions.sort(
@@ -2010,7 +2119,8 @@ class MyWindow(QMainWindow):
                 labels[i].setText('- - - - - - - -')
                 try:
                     cur = sessions[i]
-                    text = 'Фильм {} показывается в кинотеатре по адресу {} {} в кинозале {}'.format(
+                    text = '''Фильм {} показывается в кинотеатре по адресу
+                    {} {} в кинозале {}'''.format(
                         cur[-1], cur[1], cur[3], cur[2])
                     labels[i].setText(text)
                 except Exception:
@@ -2022,7 +2132,8 @@ class MyWindow(QMainWindow):
             form = '%d.%m.%Y %H:%M'
 
             sessions = cur.execute(
-                f'SELECT * FROM Sessions WHERE FilmName = ?', (film_name,)).fetchall()
+                'SELECT * FROM Sessions WHERE FilmName = ?',
+                (film_name,)).fetchall()
             sessions.sort(
                 key=lambda x: abs(
                     datetime.datetime.now() -
@@ -2042,7 +2153,8 @@ class MyWindow(QMainWindow):
                 labels[i].setText('- - - - - - - -')
                 try:
                     cur = sessions[i]
-                    text = 'Фильм {} показывается в кинотеатре по адресу {} {} в кинозале {}'.format(
+                    text = '''Фильм {} показывается в кинотеатре по
+                    адресу {} {} в кинозале {}'''.format(
                         cur[-1], cur[1], cur[3], cur[2])
                     labels[i].setText(text)
                 except Exception:
